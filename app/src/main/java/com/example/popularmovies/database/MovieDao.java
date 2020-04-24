@@ -1,5 +1,6 @@
 package com.example.popularmovies.database;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -15,7 +16,7 @@ import java.util.List;
 public interface MovieDao {
 
     @Query("SELECT * FROM favorites ORDER BY id")
-    List<Movie> loadAllMovies();
+    LiveData<List<Movie>> loadAllMovies();
 
     @Insert
     void insertMovie(Movie movie);

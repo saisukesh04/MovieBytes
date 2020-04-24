@@ -9,15 +9,15 @@ import retrofit2.http.GET;
 
 public interface RetrofitObjectAPI {
 
-    @GET("top_rated?api_key=c41221690b478c3d63b47a900a44eb68")
+    @GET("top_rated?api_key=<INSERT-API_KEY>")
     Call<Results> getTopRatedJson();
 
-    @GET("popular?api_key=c41221690b478c3d63b47a900a44eb68")
+    @GET("popular?api_key=<INSERT-API_KEY>")
     Call<Results> getPopularJson();
 
-    @GET("videos?api_key=c41221690b478c3d63b47a900a44eb68")
+    @GET("videos?api_key=<INSERT-API_KEY>")
     Call<Trailer> getTrailerJson();
 
-    @GET("reviews?api_key=c41221690b478c3d63b47a900a44eb68")
+    @GET("reviews?api_key=<INSERT-API_KEY>")
     Call<Review> getReviewJson();
 }

@@ -1,6 +1,7 @@
 package com.example.popularmovies;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,13 +12,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.popularmovies.API.RetrofitObjectAPI;
 import com.example.popularmovies.Adapter.ReviewAdapter;
 import com.example.popularmovies.Adapter.TrailerAdapter;
 import com.example.popularmovies.database.MovieDatabase;
+import com.example.popularmovies.databinding.ActivityDetailsBinding;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.model.Review;
 import com.example.popularmovies.model.Trailer;
@@ -35,6 +36,7 @@ import static com.example.popularmovies.MainActivity.baseURL;
 
 public class DetailsActivity extends AppCompatActivity {
 
+    ActivityDetailsBinding mBinding;
     private RecyclerView trailerRecyclerView;
     private RecyclerView reviewRecyclerView;
     public static String MOVIE_KEY;
@@ -43,34 +45,24 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
+        mBinding = DataBindingUtil.setContentView(this,R.layout.activity_details);
+
+        Intent movieDetails = getIntent();
+        final Movie movie = (Movie) movieDetails.getSerializableExtra("movie");
+        MOVIE_KEY = movie.getId();
 
         mDatabase = MovieDatabase.getInstance(getApplicationContext());
 
-        TextView movieTitle = findViewById(R.id.movieTitleDetails);
-        TextView movieRelease = findViewById(R.id.movieRelease);
-        ImageView moviePoster = findViewById(R.id.moviePosterDetails);
-        TextView movieOverview = findViewById(R.id.movieOverview);
-        TextView movieRating = findViewById(R.id.movieRatingDetails);
-        TextView moviePopularity = findViewById(R.id.moviePopularity);
         final ImageButton favoriteBtn = findViewById(R.id.favoriteBtn);
+        ImageView moviePoster = findViewById(R.id.moviePosterDetails);
+        Picasso.get().load("http://image.tmdb.org/t/p/w342/" + movie.getPoster_path()).into(moviePoster);
+        mBinding.setMovie(movie);
 
         trailerRecyclerView = findViewById(R.id.trailerRecyclerView);
         trailerRecyclerView.setHasFixedSize(true);
 
         reviewRecyclerView = findViewById(R.id.reviewRecyclerView);
         reviewRecyclerView.setHasFixedSize(true);
-
-        Intent movieDetails = getIntent();
-        final Movie movie = (Movie) movieDetails.getSerializableExtra("movie");
-
-        movieTitle.setText(movie.getTitle());
-        movieRelease.setText(movie.getRelease_date());
-        movieRating.setText(movie.getVote_average() + " / 10");
-        moviePopularity.setText(movie.getPopularity());
-        movieOverview.setText(movie.getOverview());
-        Picasso.get().load("http://image.tmdb.org/t/p/w342/" + movie.getPoster_path()).into(moviePoster);
-        MOVIE_KEY = movie.getId();
 
         if(mDatabase.movieDao().loadMovieById(movie.getId()) != null){
             Drawable img = getApplicationContext().getResources().getDrawable(R.drawable.ic_favorite);
@@ -100,8 +92,9 @@ public class DetailsActivity extends AppCompatActivity {
                     Movie favMovie = new Movie(movie.getId(), movie.getTitle(), movie.getPoster_path(),
                             movie.getOverview(), movie.getRelease_date(), movie.getPopularity(), movie.getVote_average());
                     mDatabase.movieDao().insertMovie(favMovie);
+                    Drawable img = getApplicationContext().getResources().getDrawable(R.drawable.ic_favorite);
+                    favoriteBtn.setImageDrawable(img);
                     Toast.makeText(DetailsActivity.this, "Movie added as Favorite", Toast.LENGTH_SHORT).show();
-                    finish();
                 }
             }
         });
@@ -110,9 +103,9 @@ public class DetailsActivity extends AppCompatActivity {
     private void getTrailers() {
 
         Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(baseURL + MOVIE_KEY + "/")
-                            .addConverterFactory(GsonConverterFactory.create())
-                            .build();
+                .baseUrl(baseURL + MOVIE_KEY + "/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
         RetrofitObjectAPI service = retrofit.create(RetrofitObjectAPI.class);
         final Call<Trailer> trailerCall = service.getTrailerJson();
@@ -156,5 +149,4 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
     }
-
 }

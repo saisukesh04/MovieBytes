@@ -2,19 +2,26 @@ package com.example.popularmovies;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.popularmovies.API.RetrofitObjectAPI;
 import com.example.popularmovies.Adapter.MoviesAdapter;
 import com.example.popularmovies.database.MovieDatabase;
+import com.example.popularmovies.database.ViewModel;
 import com.example.popularmovies.model.Movie;
 import com.example.popularmovies.model.Results;
 
@@ -30,7 +37,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static RecyclerView posterGridView;
-    public static int choice;
+    public static int choice = 1;
     private ProgressDialog loadingDialog;
     public static final String baseURL = "https://api.themoviedb.org/3/movie/";
     private MovieDatabase mDatabase;
@@ -41,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         int spanCount;
-        choice = 1;
         loadingDialog = new ProgressDialog(this);
 
         posterGridView = findViewById(R.id.posterGridView);
@@ -63,42 +69,57 @@ public class MainActivity extends AppCompatActivity {
 
     private void executeTask(final int integer) {
 
-        loadingDialog.setMessage("\tLoading...");
-        loadingDialog.setCancelable(true);
-        loadingDialog.show();
+        ConnectivityManager cm = (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(baseURL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        assert cm != null;
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
 
-        RetrofitObjectAPI service = retrofit.create(RetrofitObjectAPI.class);
-        Call<Results> movieCall;
-
-        if(integer == 1) {
-            movieCall = service.getTopRatedJson();
+        if(integer == 3){
+            getFavorites();
         }else{
-            movieCall = service.getPopularJson();
-        }
-        movieCall.enqueue(new Callback<Results>() {
-            @Override
-            public void onResponse(Call<Results> call, Response<Results> response) {
-                assert response.body() != null;
-                List<Movie> movies = response.body().getResults();
-                if (integer == 2) {
-                    Collections.sort(movies, Collections.reverseOrder(Movie.BY_POPULARITY));
-                } else {
-                    Collections.sort(movies, Collections.reverseOrder(Movie.BY_RATING));
-                }
-                posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(),movies));
-                loadingDialog.dismiss();
-            }
+            if (isConnected) {
+                loadingDialog.setMessage("\tLoading...");
+                loadingDialog.setCancelable(true);
+                loadingDialog.show();
 
-            @Override
-            public void onFailure(Call<Results> call, Throwable t) {
-                Log.i("info: Error: ", t.getMessage());
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(baseURL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                RetrofitObjectAPI service = retrofit.create(RetrofitObjectAPI.class);
+                Call<Results> movieCall;
+
+                if (integer == 1) {
+                    movieCall = service.getTopRatedJson();
+                } else {
+                    movieCall = service.getPopularJson();
+                }
+                Log.i("Info: ", "OMG00");
+                movieCall.enqueue(new Callback<Results>() {
+                    @Override
+                    public void onResponse(Call<Results> call, Response<Results> response) {
+                        assert response.body() != null;
+                        List<Movie> movies = response.body().getResults();
+                        if (integer == 2) {
+                            Collections.sort(movies, Collections.reverseOrder(Movie.BY_POPULARITY));
+                        } else {
+                            Collections.sort(movies, Collections.reverseOrder(Movie.BY_RATING));
+                        }
+                        posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(), movies));
+                        loadingDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Results> call, Throwable t) {
+                        Log.i("info: Error: ", t.getMessage());
+                    }
+                });
+            } else {
+                Toast.makeText(this, "Please check your INTERNET connection!", Toast.LENGTH_LONG).show();
             }
-        });
+        }
     }
 
     @Override
@@ -128,16 +149,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getFavorites() {
-        posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(),mDatabase.movieDao().loadAllMovies()));
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (choice == 1 || choice == 2) {
-        }else {
-            List<Movie> movies = mDatabase.movieDao().loadAllMovies();
-            posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(), movies));
-        }
+        ViewModel viewModel = ViewModelProviders.of(this).get(ViewModel.class);
+        viewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(List<Movie> movies) {
+                posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(), movies));
+            }
+        });
     }
 }

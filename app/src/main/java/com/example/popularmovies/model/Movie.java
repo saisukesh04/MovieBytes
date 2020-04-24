@@ -2,6 +2,7 @@ package com.example.popularmovies.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ public class Movie implements Serializable {
     private String popularity;
     private String vote_average;
 
+    @Ignore
     public Movie(){
     }
 
@@ -105,13 +107,3 @@ public class Movie implements Serializable {
         }
     };
 }
-
-/*
-Use Parcelable instead of Serializable
-
-I suggest using parcelable instead.
-
-Parcelable process is much faster than Serializable. One of the reasons for this is that we are
-being explicit about the serialization process instead of using reflection to infer it. It also
-stands to reason that the code has been heavily optimized for this purpose.
- */

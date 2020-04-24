@@ -50,7 +50,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.ViewHolder
             holder.movieRating.setText(movie.getPopularity());
         }
         Picasso.get().load(posterURL).into(holder.moviePoster);
-        holder.moviePoster.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent movieDetails = new Intent(context, DetailsActivity.class);
