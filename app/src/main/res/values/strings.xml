@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="mainMovieTitle">Movie Title</string>
+    <string name="TextView">TextView</string>
+    <string name="ratingsText">Ratings: </string>
+    <string name="popularityText">Popularity: </string>
+    <string name="sortBy">Sort By</string>
+    <string name="ratings">Rating</string>
+    <string name="popularity">Popularity</string>
+    <string name="trailerText">Trailers &amp; Clips: </string>
+    <string name="reviewText">"Reviews: "</string>
+    <string name="favorites">Favorite</string>
+</resources>

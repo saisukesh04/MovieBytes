@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_sort_item"
+        android:icon="@drawable/ic_sort_white_24dp"
+        android:title="@string/sortBy"
+        app:showAsAction="always" >
+
+        <menu>
+            <item
+                android:id="@+id/sortBy_rating"
+                android:title="@string/ratings" />
+            <item
+                android:id="@+id/sortBy_popularity"
+                android:title="@string/popularity" />
+            <item
+                android:id="@+id/sortBy_favorites"
+                android:title="@string/favorites" />
+        </menu>
+
+    </item>
+</menu>
