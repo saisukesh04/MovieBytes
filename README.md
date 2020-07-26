@@ -29,4 +29,4 @@ This app can:
 * AppCompat, Constraint, Design, Palette
 
 ### How to work with the source code:
-This application uses [The Movie Database, TMDb](https://www.themoviedb.org/) API to serve the movie data. You must provide your own API key in order to build the app. After obtaining an API key, add to the "API_KEY" constant in the MainActivity.java file.
+This application uses [The Movie Database, TMDb](https://www.themoviedb.org/) API to serve the movie data.
