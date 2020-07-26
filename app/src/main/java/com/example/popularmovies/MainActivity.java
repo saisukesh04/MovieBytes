@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.example.popularmovies.API.RetrofitObjectAPI;
@@ -37,8 +38,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static RecyclerView posterGridView;
+    private MoviesAdapter adapter;
     public static int choice = 1;
     private ProgressDialog loadingDialog;
+    private SearchView searchView;
+
     public static final String baseURL = "https://api.themoviedb.org/3/movie/";
     private MovieDatabase mDatabase;
 
@@ -49,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
         int spanCount;
         loadingDialog = new ProgressDialog(this);
+        searchView = findViewById(R.id.searchView);
 
         posterGridView = findViewById(R.id.posterGridView);
         posterGridView.setHasFixedSize(true);
@@ -65,6 +70,19 @@ public class MainActivity extends AppCompatActivity {
         posterGridView.setLayoutManager(gridLayoutManager);
 
         mDatabase = MovieDatabase.getInstance(getApplicationContext());
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
     }
 
     private void executeTask(final int integer) {
@@ -107,7 +125,8 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             Collections.sort(movies, Collections.reverseOrder(Movie.BY_RATING));
                         }
-                        posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(), movies));
+                        adapter = new MoviesAdapter(getApplicationContext(), movies);
+                        posterGridView.setAdapter(adapter);
                         loadingDialog.dismiss();
                     }
 
@@ -153,7 +172,8 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getMovies().observe(this, new Observer<List<Movie>>() {
             @Override
             public void onChanged(List<Movie> movies) {
-                posterGridView.setAdapter(new MoviesAdapter(getApplicationContext(), movies));
+                adapter = new MoviesAdapter(getApplicationContext(), movies);
+                posterGridView.setAdapter(adapter);
             }
         });
     }
